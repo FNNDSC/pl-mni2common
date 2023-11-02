@@ -1,22 +1,26 @@
-# Python version can be changed, e.g.
-# FROM python:3.8
-# FROM ghcr.io/mamba-org/micromamba:1.5.1-focal-cuda-11.3.1
-FROM docker.io/python:3.12.0-slim-bookworm
+FROM docker.io/fnndsc/pl-mni2common:base-1
 
 LABEL org.opencontainers.image.authors="FNNDSC <dev@babyMRI.org>" \
-      org.opencontainers.image.title="ChRIS Plugin Title" \
-      org.opencontainers.image.description="A ChRIS plugin that..."
+      org.opencontainers.image.title="pl-mnc2common" \
+      org.opencontainers.image.description="A ChRIS plugin to convert MINC volume and MNI .obj surface file formats to NIFTI and Wavefront OBJ respectively."
 
-ARG SRCDIR=/usr/local/src/app
+# use micromamba to install binary python dependencies for multiarch build
+RUN \
+    --mount=type=cache,sharing=private,target=/home/mambauser/.mamba/pkgs,uid=57439,gid=57439 \
+    --mount=type=cache,sharing=private,target=/opt/conda/pkgs,uid=57439,gid=57439 \
+    micromamba install -y -n base -c conda-forge python=3.11.5 numpy=1.26.0
+
+ARG SRCDIR=/usr/local/src/pl-mni2common
 WORKDIR ${SRCDIR}
 
-COPY requirements.txt .
-RUN --mount=type=cache,sharing=private,target=/root/.cache/pip pip install -r requirements.txt
+COPY --chown=57439:57439 requirements.txt .
+RUN --mount=type=cache,sharing=private,target=/home/mambauser/.cache/pip,uid=57439,gid=57439 \
+    pip install -r requirements.txt
 
-COPY . .
+COPY --chown=mambauser:mambauser . .
 ARG extras_require=none
 RUN pip install ".[${extras_require}]" \
-    && cd / && rm -rf ${SRCDIR}
+    && cd / && rm -rf ${SRCDIR}/*
 WORKDIR /
 
-CMD ["commandname"]
+CMD ["mni2common"]

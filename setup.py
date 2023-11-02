@@ -19,18 +19,18 @@ def get_version(rel_path: str) -> str:
 
 
 setup(
-    name='chris-plugin-template',
-    version=get_version('app.py'),
-    description='A ChRIS DS plugin template',
+    name='mni2common',
+    version=get_version('mni2common.py'),
+    description='A ChRIS plugin to convert MINC volume and MNI .obj surface file formats to NIFTI and Wavefront OBJ respectively.',
     author='FNNDSC',
-    author_email='dev@babyMRI.org',
-    url='https://github.com/FNNDSC/python-chrisapp-template',
-    py_modules=['app'],
-    install_requires=['chris_plugin'],
+    author_email='jennings.zhang@childrens.harvard.edu',
+    url='https://github.com/FNNDSC/pl-mni2common',
+    py_modules=['mni2common'],
+    install_requires=['chris_plugin', 'pybicpl', 'tqdm'],
     license='MIT',
     entry_points={
         'console_scripts': [
-            'commandname = app:main'
+            'mni2common = mni2common:main'
         ]
     },
     classifiers=[

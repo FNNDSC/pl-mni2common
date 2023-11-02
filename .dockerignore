@@ -13,6 +13,7 @@ __pycache__/
 .idea/
 .vscode/
 
-examples/
+/examples
+/base
 
 venv/
