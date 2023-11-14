@@ -9,7 +9,6 @@ from pathlib import Path
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 from tqdm.contrib.concurrent import thread_map
 from tqdm.contrib.logging import logging_redirect_tqdm
-from bicpl import PolygonObj, WavefrontObj
 
 from chris_plugin import chris_plugin, PathMapper
 
@@ -27,7 +26,7 @@ DISPLAY_TITLE = r"""
 """
 
 
-parser = ArgumentParser(description='Convert MINC and .obj to NIFTI and Wavefront respectively',
+parser = ArgumentParser(description='Convert MINC and .obj to NIFTI and MZ3 respectively',
                         formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument('-p', '--pattern', default='**/*', type=str,
                     help='Path filter')
@@ -60,12 +59,15 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
 
 def convert_file(file_pair: tuple[Path, Path]) -> bool:
     input_file, output_file = file_pair
-    if input_file.suffix == '.mnc':
-        return convert_minc(input_file, output_file.with_suffix('.nii'))
-    elif input_file.suffix == '.obj':
-        return convert_obj(input_file, output_file.with_suffix('.wf.obj'))
-    shutil.copy2(input_file, output_file)
-    return True
+    match input_file.suffix:
+        case '.mnc':
+            return convert_minc(input_file, output_file.with_suffix('.nii'))
+        case '.obj' | '.txt':
+            return mni2mz3(input_file, output_file.with_suffix('.mz3'))
+        case _:
+            if os.path.realpath(input_file) != os.path.realpath(output_file):
+                shutil.copy2(input_file, output_file)
+            return True
 
 
 def convert_minc(mnc, nii) -> bool:
@@ -79,16 +81,19 @@ def convert_minc(mnc, nii) -> bool:
     return False
 
 
-def convert_obj(mniobj_path, wavefront_path) -> bool:
-    try:
-        obj = PolygonObj.from_file(mniobj_path)
-        wf = WavefrontObj.from_mni(obj)
-        with wavefront_path.open('w') as f:
-            wf.write_to(f)
+def mni2mz3(input_path, output_path) -> bool:
+    cmd = ('mni2mz3', str(input_path), str(output_path))
+    proc = sp.run(cmd, stderr=sp.PIPE, stdout=sp.DEVNULL)
+    if proc.returncode == 0:
         return True
-    except Exception as e:
-        LOG.error(str(e))
-        return False
+    # is a .txt file, but not a vertex-wise surface data file
+    if input_path.suffix == '.txt' and b'Could not parse 0th value as float' in proc.stderr:
+        output_txt = output_path.with_suffix(input_path.suffix)
+        if os.path.realpath(input_path) != os.path.realpath(output_txt):
+            shutil.copy2(input_path, output_txt)
+        return True
+    LOG.error(f'Command failed: {shlex.join(cmd)}')
+    return False
 
 
 if __name__ == '__main__':

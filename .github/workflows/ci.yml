@@ -82,13 +82,41 @@ jobs:
           tags: ${{ steps.info.outputs.local_tag }}
           load: true
           cache-from: type=gha
-      # If you have a directory called examples/incoming/ and examples/outgoing/, then
-      # run your ChRIS plugin with no parameters, and assert that it creates all the files
-      # which are expected. File contents are not compared.
+      - name: Download example data
+        run: examples/download.sh
       - name: Run examples
         id: run_examples
         run: |
-          echo TODO
+          mkdir /tmp/outgoing
+          docker run --rm -u "$(id -u):$(id -g)" \
+            -v "${{ github.workspace }}/examples/incoming:/incoming:ro" \
+            -v "/tmp/outgoing:/outgoing:rw" \
+            ${{ steps.info.outputs.local_tag }} \
+            mni2common /incoming /outgoing
+      - name: Assert example outputs are found
+        run: |
+          expected_outputs=(
+            /tmp/outgoing/colin27_t1_tal_lin.mnc2nii.log
+            /tmp/outgoing/colin27_t1_tal_lin.nii
+            /tmp/outgoing/colin27_t1_tal_lin_headmask.mnc2nii.log
+            /tmp/outgoing/colin27_t1_tal_lin_headmask.nii
+            /tmp/outgoing/colin27_t1_tal_lin_mask.mnc2nii.log
+            /tmp/outgoing/colin27_t1_tal_lin_mask.nii
+            /tmp/outgoing/colin_white_mc_left.mz3
+            /tmp/outgoing/colin_white_mc_mask_left.mz3
+            /tmp/outgoing/colin_white_mc_mask_right.mz3
+            /tmp/outgoing/colin_white_mc_right.mz3
+          )
+
+          for expected_output in "${expected_outputs[@]}"; do
+            if ! [ -f "$expected_output" ]; then
+              echo "expected $expected_output to be a file, but it does not."
+              parent_dir="$(dirname "$expected_output")"
+              set -ex
+              ls -lh "$parent_dir"
+              exit 1
+            fi
+          done
 
       - name: Login to DockerHub
         if: (github.event_name == 'push' || github.event_name == 'release') && contains(steps.info.outputs.tags_csv, 'docker.io')

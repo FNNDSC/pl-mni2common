@@ -21,12 +21,12 @@ def get_version(rel_path: str) -> str:
 setup(
     name='mni2common',
     version=get_version('mni2common.py'),
-    description='A ChRIS plugin to convert MINC volume and MNI .obj surface file formats to NIFTI and Wavefront OBJ respectively.',
+    description='A ChRIS plugin to convert MINC volume and MNI .obj surface file formats to NIFTI and MZ3 OBJ respectively.',
     author='FNNDSC',
     author_email='jennings.zhang@childrens.harvard.edu',
     url='https://github.com/FNNDSC/pl-mni2common',
     py_modules=['mni2common'],
-    install_requires=['chris_plugin', 'pybicpl', 'tqdm'],
+    install_requires=['chris_plugin==0.3.1', 'tqdm~=4.66'],
     license='MIT',
     entry_points={
         'console_scripts': [

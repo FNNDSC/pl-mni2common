@@ -5,12 +5,11 @@
 [![ci](https://github.com/FNNDSC/pl-mni2common/actions/workflows/ci.yml/badge.svg)](https://github.com/FNNDSC/pl-mni2common/actions/workflows/ci.yml)
 
 `pl-mni2common` is a [_ChRIS_](https://chrisproject.org/)
-_ds_ plugin which takes in ...  as input files and
-creates ... as output files.
-
-## Abstract
-
-...
+_ds_ plugin wrapper around the programs
+[mnc2nii](https://bic-mni.github.io/man-pages/man/mnc2nii.html)
+and [mni2mz3](https://github.com/FNNDSC/mni2mz3).
+It converts MINC volumes to NIFTI, surfaces to MZ3, and surface data to MZ3.
+The output file formats NIFTI and MZ3 are convenient for visualization by [niivue](https://github.com/niivue/niivue).
 
 ## Installation
 
