@@ -97,11 +97,11 @@ jobs:
         run: |
           expected_outputs=(
             /tmp/outgoing/colin27_t1_tal_lin.mnc2nii.log
-            /tmp/outgoing/colin27_t1_tal_lin.nii
+            /tmp/outgoing/colin27_t1_tal_lin.nii.gz
             /tmp/outgoing/colin27_t1_tal_lin_headmask.mnc2nii.log
-            /tmp/outgoing/colin27_t1_tal_lin_headmask.nii
+            /tmp/outgoing/colin27_t1_tal_lin_headmask.nii.gz
             /tmp/outgoing/colin27_t1_tal_lin_mask.mnc2nii.log
-            /tmp/outgoing/colin27_t1_tal_lin_mask.nii
+            /tmp/outgoing/colin27_t1_tal_lin_mask.nii.gz
             /tmp/outgoing/colin_white_mc_left.mz3
             /tmp/outgoing/colin_white_mc_mask_left.mz3
             /tmp/outgoing/colin_white_mc_mask_right.mz3

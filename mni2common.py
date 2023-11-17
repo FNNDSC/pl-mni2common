@@ -12,7 +12,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 from chris_plugin import chris_plugin, PathMapper
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 DISPLAY_TITLE = r"""
        _                        _  _____                                           
@@ -75,9 +75,15 @@ def convert_minc(mnc, nii) -> bool:
     cmd = ('mnc2nii', str(mnc), str(nii))
     with log_file.open('wb') as log_handle:
         proc = sp.run(cmd, stderr=log_handle, stdout=log_handle)
+    if proc.returncode != 0:
+        LOG.error(f'Command failed: {shlex.join(cmd)} > {log_file}')
+        return False
+
+    cmd = ('gzip', str(nii))
+    proc = sp.run(cmd)
     if proc.returncode == 0:
         return True
-    LOG.error(f'Command failed: {shlex.join(cmd)} > {log_file}')
+    LOG.error(f'Command failed: {shlex.join(cmd)}')
     return False
 
 
